@@ -56,7 +56,7 @@ def create_product(product_in: ProductCreate, db: Session = Depends(get_db), cur
     return new_product
 
 @router.put("/{product_id}", response_model=ProductResponse)
-def update_product(product_id: int, product_in: ProductCreate, db: Session = Depends(get_db)):
+def update_product(product_id: int, product_in: ProductCreate, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     updated = db.query(ProductModel).filter(ProductModel.id == product_id).first()
     if not updated:
         raise HTTPException(status_code=404, detail="Product can't be updated")
@@ -68,12 +68,12 @@ def update_product(product_id: int, product_in: ProductCreate, db: Session = Dep
     db.refresh(updated)
     return updated
 
-@router.delete("/{product_id}")
-def delete_product(product_id: int, db: Session = Depends(get_db)):
+@router.delete("/{product_id}", status_code=204)
+def delete_product(product_id: int, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     deleted = db.query(ProductModel).filter(ProductModel.id==product_id).first()
     if not deleted:
         raise HTTPException(status_code=404, detail="Product can't be deleted")
-    else:
-        db.delete(deleted)
-        db.commit()
-        return {"message": f"Product with the ID of: {product_id} was deleted succesfully"}
+    
+    db.delete(deleted)
+    db.commit()
+    return None

@@ -14,7 +14,7 @@ router = APIRouter(
     tags=["Authentication"] #this creates a Swagger tag with this name
 )
 
-# ENDPOINTS: REGISTER, LOGIN, 
+# ENDPOINTS: REGISTER, LOGIN, POST
 
 # for REGISTER users (sign up)
 @router.post("/register", status_code=201, response_model=UserResponse)
