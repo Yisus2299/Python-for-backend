@@ -41,6 +41,7 @@ async def logging_user(request: Request, db: Session = Depends(get_db)):
     content_type = request.headers.get("content-type", "")
     email = None
     password = None
+    
 
     if "application/x-www-form-urlencoded" in content_type:
         form = await request.form()
