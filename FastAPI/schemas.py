@@ -1,6 +1,7 @@
 # here will be the valitradion with Pydantic models
 # Schemas checks if the JSON is safe and sound, it's what the user will see:
 from pydantic import BaseModel
+from typing import List
 
 #Response: it's what the server sends to the client (frontend). it's what the server responds
 #Model: save it into the DataBase
@@ -62,3 +63,18 @@ class UserResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+    
+class OrderItemCreate(BaseModel):
+    product_id: int
+    quantity: int
+
+class OrderCreate(BaseModel):
+    items: List[OrderItemCreate]
+
+class OrderResponse(BaseModel):
+    id: int
+    user_id: int
+    created_at: str
+    
+    class Config:
+        from_attributes = True

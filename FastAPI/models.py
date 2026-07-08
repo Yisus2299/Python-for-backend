@@ -3,6 +3,34 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
+from datetime import datetime, timezone
+
+#We'll add some new tables:
+
+class OrderItemModel(Base):
+    __tablename__ = "order_items"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"))
+    product_id = Column(Integer, ForeignKey("products.id"))
+    quantity = Column(String, default=1)
+    price_at_purchase = Column(Float, nullable=False)
+    
+    product = relationship("ProductModel")
+    
+class OrderModel(Base):
+    __tablename__ = "orders"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    created_at = Column(datetime, default=lambda: datetime.now(timezone.utc))
+    
+    #relationships
+    
+    user = relationship("UserModel")
+    items = relationship("OrderItemModel", back_populates="order", cascade="all, delete-orphan")
+
+OrderItemModel.order = relationship("OrderModel", back_populates="items")
 
 class CategoryModel(Base): #we create a new table called Categories and its above products
     __tablename__ = "categories"
@@ -32,4 +60,3 @@ class UserModel(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
-
