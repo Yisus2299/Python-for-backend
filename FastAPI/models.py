@@ -1,11 +1,16 @@
 # this will be the ORM; it saves the whole object in the database; we create the table here and what it'll has inside
 
-from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime, timezone
 
 #We'll add some new tables:
+
+# ondelete = "cascade": if you delete the user, his orders will dissapear, the database cleand all for you
+# bac_populates="order": it makes a path to go back between two tables, let's say you're in OrderItem, you can go to Order and to OrderItem
+
+
 
 class OrderItemModel(Base):
     __tablename__ = "order_items"
@@ -23,7 +28,7 @@ class OrderModel(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-    created_at = Column(datetime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     
     #relationships
     
