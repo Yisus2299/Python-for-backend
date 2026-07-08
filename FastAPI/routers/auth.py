@@ -1,9 +1,9 @@
 # (we might need to install: pip install "passlib[bcrypt]" PyJWT)
 # this is the satelite will handle the Register of users
 
-from fastapi import APIRouter, HTTPException, Depends
+from json import JSONDecodeError
+from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
-
 from database import get_db
 from schemas import UserCreate, UserResponse, TokenResponse
 from models import UserModel
@@ -35,24 +35,37 @@ def register_user(user_in: UserCreate,db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-# for Login users (sing in):
-@router.post("login", status_code=202, response_model=UserResponse)
-def logging_user( user_in: UserCreate ,db: Session = Depends(get_db)):
-    # we check if the user exists in the Email
-    
-    user = db.query(UserModel).filter(UserModel.email == user_in.email).first()
+# for Login users (sign in):
+@router.post("/login", status_code=200, response_model=TokenResponse)
+async def logging_user(request: Request, db: Session = Depends(get_db)):
+    content_type = request.headers.get("content-type", "")
+    email = None
+    password = None
+
+    if "application/x-www-form-urlencoded" in content_type:
+        form = await request.form()
+        email = form.get("username") or form.get("email")
+        password = form.get("password")
+    else:
+        try:
+            data = await request.json()
+        except JSONDecodeError:
+            data = {}
+        email = data.get("email") or data.get("username")
+        password = data.get("password")
+
+    if not email or not password:
+        raise HTTPException(status_code=422, detail="email and password are required")
+
+    user = db.query(UserModel).filter(UserModel.email == email).first()
     if not user:
-        raise HTTPException(status_code=400, detail="invalid Credentials")
-    
-    # we compare the clean password to see what the hash sent to the database
-    is_valid = verify_password(user_in.password, user.hashed_password)
+        raise HTTPException(status_code=400, detail="Invalid Credentials")
+
+    is_valid = verify_password(password, user.hashed_password)
     if not is_valid:
         raise HTTPException(status_code=400, detail="Invalid Credentials")
-    
-    # if everything is alright, we create the token putting the user's email inside
+
     token = create_access_token(data={"sub": user.email})
-    
-    # we get the token back following the TokenResponse
     return {"access_token": token, "token_type": "bearer"}
 
     

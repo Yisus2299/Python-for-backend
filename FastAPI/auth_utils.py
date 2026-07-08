@@ -2,31 +2,35 @@
 # 1- passlib[bcrypt]: turns passwords into a secret hash before saving it into the clouds
 # 2- PyJWT: Tool that will generate JTW Tokens when the user sings in successfully
 
-from passlib.context import CryptContext
 import jwt
 from datetime import datetime, timedelta, timezone
 from fastapi.security import OAuth2PasswordBearer # this means: this API requires a security token
 from fastapi import HTTPException, Depends
+import bcrypt
 
 #secret server configurations 
 SECRET_KEY = "Alekk070903"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# we say to passlib to use the algorithm 'bcrypt' ro encrypt
-pdw_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# this line tells FastAPI that looks for the token in the route /auth/login
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-# this line tells to FastAPI that looks for the token in the route /auth/login
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+# --- NEW PASSWORD FUNCTIONS---
 
 # Function 1: it receives the clean password and send back trillions of encrypt text
 def hash_password(password: str) -> str:
-    return pdw_context.hash(password)
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
 # Function 2: it compares the plain password which the user writes on the login
 # with the hash we got, it will send TRUE or FALSE
-def verify_password(plain_password: str, hased_password: str) -> bool:
-    return pdw_context.very(plain_password, hased_password)
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    try:
+        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    except Exception:
+        return False
 
 #Function 3: It generates the packet token with the user information
 def create_access_token(data: str):
@@ -44,7 +48,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
-        headers={"WW-Authenticate": "Bearer"},
+        headers={"WWW-Authenticate": "Bearer"},
     )
     try:
         # We decodificate the token using our secret password
@@ -53,5 +57,5 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
         if email is None:
             raise credentials_exception
         return email # we get the email back if all goes fine
-    except jwt.PyJWTEError:
+    except jwt.PyJWTError:
         raise credentials_exception
