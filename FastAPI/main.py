@@ -1,12 +1,25 @@
 from fastapi import FastAPI
 from database import engine, Base
-
+from fastapi.middleware.cors import CORSMiddleware
 from routers import products, categories, auth, orders
 
 #  CREATE TABLES INTO THE DATABASE
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+origins = ["*"]
+
+
+# we add the Middleware to the app (a middleware is like a door API watcher who checks every single petition before it gets to Routers)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,       # it allows petitions from the URLs (the origin list)
+    allow_credentials=True,      # it allows the cookies and authentication credentials
+    allow_methods=["*"],         # it allows all HTTP (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],         # it allows all HTTP headers (incluing the Authorization Token)
+)
+
 
 # we connect the teo routers to the main server
 app.include_router(products.router)
@@ -18,7 +31,7 @@ app.include_router(orders.router)
 # we just let the route HOME just for testing
 @app.get("/")
 def home():
-    return{"message": "Hello just testing the API"}
+    return{"message": "Welcome to the Store API Test"}
 
 
 

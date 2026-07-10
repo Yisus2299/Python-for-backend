@@ -3,15 +3,20 @@
 # 2- PyJWT: Tool that will generate JTW Tokens when the user sings in successfully
 
 import jwt
+import os
 from datetime import datetime, timedelta, timezone
 from fastapi.security import OAuth2PasswordBearer # this means: this API requires a security token
 from fastapi import HTTPException, Depends
 import bcrypt
+from dotenv import load_dotenv
 
 #secret server configurations 
-SECRET_KEY = "Alekk070903"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = os.environ.get("JWT_SECRET", "Alekk070903")
+ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+
+# we load the .env
+load_dotenv()
 
 # this line tells FastAPI that looks for the token in the route /auth/login
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")

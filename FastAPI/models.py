@@ -10,8 +10,6 @@ from datetime import datetime, timezone
 # ondelete = "cascade": if you delete the user, his orders will dissapear, the database cleand all for you
 # bac_populates="order": it makes a path to go back between two tables, let's say you're in OrderItem, you can go to Order and to OrderItem
 
-
-
 class OrderItemModel(Base):
     __tablename__ = "order_items"
     
