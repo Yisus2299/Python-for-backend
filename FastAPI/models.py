@@ -16,7 +16,7 @@ class OrderItemModel(Base):
     id = Column(Integer, primary_key=True, index=True)
     order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"))
     product_id = Column(Integer, ForeignKey("products.id"))
-    quantity = Column(String, default=1)
+    quantity = Column(Integer, default=1, nullable=False)
     price_at_purchase = Column(Float, nullable=False)
     
     product = relationship("ProductModel")
@@ -27,10 +27,12 @@ class OrderModel(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    total_price = Column(Float, default=0.0)
+    status = Column(String, default="pending")
     
     #relationships
     
-    user = relationship("UserModel")
+    user = relationship("UserModel", back_populates="orders")
     items = relationship("OrderItemModel", back_populates="order", cascade="all, delete-orphan")
 
 OrderItemModel.order = relationship("OrderModel", back_populates="items")
@@ -49,6 +51,7 @@ class ProductModel(Base):
     name = Column(String, index=True)
     price = Column(Float)
     is_offer = Column(Boolean, default=False)
+    stock = Column(Integer, default=0)
     
     category_id = Column(Integer, ForeignKey("categories.id"))
     category = relationship("CategoryModel", back_populates="products") # and from a category you can access to all it's products
@@ -63,3 +66,5 @@ class UserModel(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
+    
+    orders = relationship("OrderModel", back_populates="user")

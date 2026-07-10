@@ -8,7 +8,10 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-origins = ["*"]
+origins = [
+    "http://localhost:3000",      # The standar Port
+    "http://localhost:5173"     # Vite standar Port
+]
 
 
 # we add the Middleware to the app (a middleware is like a door API watcher who checks every single petition before it gets to Routers)

@@ -1,6 +1,6 @@
 # here will be the valitradion with Pydantic models
 # Schemas checks if the JSON is safe and sound, it's what the user will see:
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Optional
 from datetime import datetime
 
@@ -12,6 +12,14 @@ from datetime import datetime
 # create = { "email": "a@a.com", "password": "1234" }
 # model = UserModel(email="a@a.com", hashed_password="hash_encriptado")
 # response = { "id": 1, "email": "a@a.com", "is_active": true }
+
+class OrderItemCreate(BaseModel):
+    product_id: int
+    quantity: int
+
+class OrderCreate(BaseModel):
+    items: List[OrderItemCreate]
+
 
 # users and tokens
 
@@ -52,8 +60,25 @@ class CategoryResponse(BaseModel):
 class ProductCreate(BaseModel):
     name: str
     price: float
+    stock: int = 0
     is_offer: bool = False
     category_id: int
+
+# let's implement a price validation
+    @field_validator('price') #with this we check the field "price"
+    @classmethod
+    def validate_price(cls, value: float) -> float:
+        if value <= 0:
+            raise ValueError("The Product Price must be higher than 0")
+        return value
+    
+    # Stock Validation
+    @field_validator('stock')
+    @classmethod
+    def validate_stock(cls, value: int) -> int:
+        if value < 0:
+            raise ValueError("Stock can't be a negative number")
+        return value
     
 class ProductResponse(BaseModel):
     id: int
