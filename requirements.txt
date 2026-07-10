@@ -3,8 +3,9 @@
 fastapi==0.111.0
 uvicorn==0.30.1
 sqlalchemy==2.0.31
-passlib[bcrypt]==1.7.4
+bcrypt==4.2.0
 pyjwt==2.8.0
+python-dotenv==1.0.1
 
 # you should create a venv folder and try everything in there just in case:
 
