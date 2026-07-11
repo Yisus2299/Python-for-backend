@@ -4,11 +4,11 @@ Fase 4: Relaciones (SQL Avanzado) ####=== TERMINE ESTO (05/07/26) ===####
 ↓
 Fase 5: Autenticación (JWT) - ####=== TERMINE ESTO (06/07/26) ===####
 ↓
-Fase 6: Caché (Redis) - ####=== EMPECE Y ESTOY AQUI (06/07/26) ===####
+Fase 6: Caché (Redis) - ####=== TERMINE ESTO (07/07/26) ===####
 ↓
 Fase 7: IA (OpenCode)
 ↓
-Fase 8: Testing
+Fase 8: Testing ###==== HOY (10/07/26) ===###
 ↓
 Fase 9: Deploy (Docker, Nube)
 ↓

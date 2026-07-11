@@ -3,9 +3,9 @@
 # here we'll bring everything and modify all the Endpoints for using them into Main.py in a easier and shorter way
 
 # we import first fastapi and sql for the database
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
-
+from typing import List, Optional
 # now we need to import what we have in the rest of our files
 # we use ".." to go outside the folder, it's like "../"
 from database import get_db
@@ -30,8 +30,34 @@ router = APIRouter(
 #2- we move all Endpoints changing their @app for @router instead
 
 @router.get("", response_model=list[ProductResponse]) # this is the same as "/produtcs"
-def get_all_products(db: Session = Depends(get_db)):
-    products = db.query(ProductModel).all()
+def get_all_products(
+    db: Session = Depends(get_db),
+    #pagination parameters
+    skip: int = Query(default=0, ge=0, description="register number to skip (offset)"),
+    limit: int = Query(default=10, ge=1, le=100, description="Maximun register number to return (limit)"),
+    # parameters advanced filter:
+    category_id: Optional[int] = Query(default=None, description="Filter through ID by Category"),
+    is_offer: Optional[bool] = Query(default=None, description="Filter if the product is in offer"),
+    min_price: Optional[float] = Query(default=None, description="Minimum Price"),
+    max_price: Optional[float] = Query(default=None, description="Maximum Price")
+    ):
+    
+    # Iniciate based consult without running it yet:
+    query = db.query(ProductModel)
+    # we aplicate the dynamic filters if the client sends them:
+    if category_id is not None:
+        query = query.filter(ProductModel.category_id == category_id)
+    if is_offer is not None:
+        query = query.filter(ProductModel.is_offer == is_offer)
+    if min_price is not None:
+        query = query.filter(ProductModel.min_price == min_price)
+    if max_price is not None:
+        query = query.filter(ProductModel.max_price == max_price)
+    
+    # Apply pagination using offset(skip) and Limit
+    # offset() skips fist N registers and limit() takes the next numbers:
+    products = query.offset(skip).limit(limit).all()
+        
     return products
 
 @router.get("/{product_id}", response_model= ProductResponse) # this is the same as "/products/{product_id}""
