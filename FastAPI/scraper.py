@@ -13,7 +13,7 @@ def broser_test():
     
     try:
         #let's go to google:
-        print("Going yo Google")
+        print("Going to Google")
         driver.get("https://www.google.com")
         time.sleep(2)
         
